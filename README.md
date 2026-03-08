@@ -66,14 +66,13 @@ CLI is the universal interface for both humans and AI agents:
 
 | Category | How to be Agent-native | Notable Examples |
 |----------|----------------------|----------|
-| **📂 GitHub Repositories** | Transform any open-source project into agent-controllable tools through automatic CLI generation | React, Linux, VSCode, TensorFlow, WordPress, Django, Vue, Angular |
-| **🤖 AI/ML Platforms** | Automate model training, inference pipelines, and hyperparameter tuning through structured commands | Stable Diffusion WebUI, Transformers, PyTorch, TensorFlow, LangChain, OpenAI Gym, MLflow |
-| **📊 Data & Analytics** | Enable programmatic data processing, visualization, and statistical analysis workflows | Pandas, Jupyter, Apache Superset, Tableau, Power BI, R Studio, Matplotlib, Plotly |
-| **💻 Development Tools** | Streamline code editing, building, testing, and deployment processes via command interfaces | VSCode, Docker, Kubernetes, Jenkins, GitHub Actions, Webpack, Babel, ESLint |
-| **🎨 Creative & Media** | Control content creation, editing, and rendering workflows programmatically | Blender, GIMP, OBS Studio, Audacity, DaVinci Resolve, After Effects, Photoshop, Premiere Pro |
-| **🔬 Scientific Computing** | Automate research workflows, simulations, and complex calculations | ImageJ, FreeCAD, QGIS, MATLAB, Mathematica, OriginPro, AutoCAD, SolidWorks |
-| **🏢 Enterprise & Office** | Convert business applications and productivity tools into agent-accessible systems | NextCloud, GitLab, Grafana, Slack, Microsoft Office, Google Workspace, Notion, Airtable | 
-
+| **📂 GitHub Repositories** | Transform any open-source project into agent-controllable tools through automatic CLI generation | VSCodium, WordPress, Calibre, Zotero, Joplin, Logseq, Penpot, Super Productivity |
+| **🤖 AI/ML Platforms** | Automate model training, inference pipelines, and hyperparameter tuning through structured commands | Stable Diffusion WebUI, ComfyUI, InvokeAI, Text-generation-webui, Open WebUI, Fooocus, Kohya_ss, AnythingLLM, SillyTavern |
+| **📊 Data & Analytics** | Enable programmatic data processing, visualization, and statistical analysis workflows | JupyterLab, Apache Superset, Metabase, Redash, DBeaver, KNIME, Orange, OpenSearch Dashboards, Lightdash |
+| **💻 Development Tools** | Streamline code editing, building, testing, and deployment processes via command interfaces | Jenkins, Gitea, Hoppscotch, Portainer, pgAdmin, SonarQube, ArgoCD, OpenLens, Insomnia, Beekeeper Studio |
+| **🎨 Creative & Media** | Control content creation, editing, and rendering workflows programmatically | Blender, GIMP, OBS Studio, Audacity, Krita, Kdenlive, Shotcut, Inkscape, Darktable, LMMS, Ardour |
+| **🔬 Scientific Computing** | Automate research workflows, simulations, and complex calculations | ImageJ, FreeCAD, QGIS, ParaView, Gephi, LibreCAD, Stellarium, KiCad, JASP, Jamovi |
+| **🏢 Enterprise & Office** | Convert business applications and productivity tools into agent-accessible systems | NextCloud, GitLab, Grafana, Mattermost, LibreOffice, AppFlowy, NocoDB, Odoo (Community), Plane, ERPNext |
 ---
 
 ## CLI-Anything's Key Features
