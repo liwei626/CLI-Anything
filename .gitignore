@@ -27,6 +27,7 @@
 !/obs-studio/
 !/kdenlive/
 !/shotcut/
+!/anygen/
 
 # Step 5: Inside each software dir, ignore everything (including dotfiles)
 /gimp/*
@@ -45,6 +46,8 @@
 /kdenlive/.*
 /shotcut/*
 /shotcut/.*
+/anygen/*
+/anygen/.*
 
 # Step 6: ...except agent-harness/
 !/gimp/agent-harness/
@@ -55,6 +58,7 @@
 !/obs-studio/agent-harness/
 !/kdenlive/agent-harness/
 !/shotcut/agent-harness/
+!/anygen/agent-harness/
 
 # Step 7: Ignore build artifacts within allowed dirs
 **/__pycache__/
