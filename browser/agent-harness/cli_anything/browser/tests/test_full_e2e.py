@@ -6,16 +6,26 @@ Usage:
     python -m pytest cli_anything/browser/tests/test_full_e2e.py -v
 """
 
+import os
 import pytest
 from click.testing import CliRunner
 
 from cli_anything.browser.utils.domshell_backend import is_available
 from cli_anything.browser.browser_cli import cli
 
-# Skip all tests if DOMShell is not available
+# Control whether to run DOMShell E2E tests via an environment variable.
+# This avoids invoking `npx` (inside is_available) during test collection
+# in environments that have not explicitly opted in.
+DOMSHELL_E2E_ENABLED = os.environ.get("DOMSHELL_E2E", "").lower() in {"1", "true", "yes"}
+
+# Skip all tests if E2E is not enabled or DOMShell is not available.
+# `is_available()` is only called when DOMSHELL_E2E_ENABLED is true.
 pytestmark = pytest.mark.skipif(
-    not is_available()[0],
-    reason="DOMShell MCP server not available. Install from Chrome Web Store."
+    (not DOMSHELL_E2E_ENABLED) or (not is_available()[0]),
+    reason=(
+        "DOMShell E2E tests are disabled or DOMShell MCP server not available. "
+        "Set DOMSHELL_E2E=1 to enable and ensure DOMShell is installed from the Chrome Web Store."
+    ),
 )
 
 TEST_URL = "https://example.com"
