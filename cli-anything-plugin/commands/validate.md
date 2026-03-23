@@ -1,7 +1,3 @@
----
-description: Validate a CLI harness against HARNESS.md standards and best practices
----
-
 # cli-anything:validate Command
 
 Validate a CLI harness against HARNESS.md standards and best practices.

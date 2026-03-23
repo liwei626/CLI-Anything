@@ -1,7 +1,3 @@
----
-description: List all available CLI-Anything tools (installed and generated)
----
-
 # cli-anything:list Command
 
 List all available CLI-Anything tools (installed and generated).
