@@ -42,6 +42,7 @@
 !/shotcut/
 !/anygen/
 !/zoom/
+!/sketch/
 !/drawio/
 !/mermaid/
 !/comfyui/
@@ -74,6 +75,8 @@
 /anygen/.*
 /zoom/*
 /zoom/.*
+/sketch/*
+/sketch/.*
 /drawio/*
 /drawio/.*
 /mermaid/*
@@ -101,6 +104,7 @@
 !/shotcut/agent-harness/
 !/anygen/agent-harness/
 !/zoom/agent-harness/
+!/sketch/agent-harness/
 !/drawio/agent-harness/
 !/mermaid/agent-harness/
 !/comfyui/agent-harness/
