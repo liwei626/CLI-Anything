@@ -466,6 +466,20 @@
       "category": "graphics",
       "contributor": "Taeyoung96",
       "contributor_url": "https://github.com/Taeyoung96"
+    },
+    {
+      "name": "exa",
+      "display_name": "Exa",
+      "version": "1.0.0",
+      "description": "AI-powered web search, similar-page discovery, and LLM-synthesised answers via the Exa API",
+      "requires": "EXA_API_KEY (free tier at exa.ai)",
+      "homepage": "https://exa.ai",
+      "install_cmd": "pip install git+https://github.com/HKUDS/CLI-Anything.git#subdirectory=exa/agent-harness",
+      "entry_point": "cli-anything-exa",
+      "skill_md": "exa/agent-harness/cli_anything/exa/skills/SKILL.md",
+      "category": "search",
+      "contributor": "tgonzalezc5",
+      "contributor_url": "https://github.com/tgonzalezc5"
     }
   ]
 }
