@@ -267,26 +267,24 @@ def server_status() -> None:
 @cli.command("repl")
 def repl() -> None:
     """Start the interactive REPL (default when no subcommand is given)."""
-    try:
-        from cli_anything.exa.utils.repl_skin import ReplSkin
-    except ImportError:
-        click.echo("prompt-toolkit is required for REPL mode: pip install prompt-toolkit")
-        sys.exit(1)
+    import shlex
+
+    from cli_anything.exa.utils.repl_skin import ReplSkin
 
     skin = ReplSkin(
         software="exa",
         version="1.0.0",
     )
     skin.print_banner()
+    pt_session = skin.create_prompt_session()
 
     while True:
         try:
-            user_input = skin.prompt()
+            line = skin.get_input(pt_session).strip()
         except (KeyboardInterrupt, EOFError):
             skin.print_goodbye()
             break
 
-        line = user_input.strip()
         if not line:
             continue
         if line.lower() in ("exit", "quit", "q"):
@@ -295,10 +293,12 @@ def repl() -> None:
 
         # Dispatch the line as a CLI invocation
         try:
-            args = line.split()
+            args = shlex.split(line)
             cli.main(args=args, standalone_mode=False)
         except SystemExit:
             pass
+        except ValueError as exc:
+            _err(f"Invalid input: {exc}")
         except Exception as exc:  # noqa: BLE001
             _err(str(exc))
 

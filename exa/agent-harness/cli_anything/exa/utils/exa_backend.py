@@ -22,7 +22,7 @@ def get_client() -> Exa:
     """Return an authenticated Exa client.
 
     Raises:
-        SystemExit: if EXA_API_KEY is not set in the environment.
+        RuntimeError: if EXA_API_KEY is not set in the environment.
     """
     api_key = os.environ.get("EXA_API_KEY", "").strip()
     if not api_key:

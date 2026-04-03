@@ -68,18 +68,7 @@ def get_contents(
     """Fetch full page contents for one or more URLs."""
     client = get_client()
 
-    kwargs: dict[str, Any] = {}
-    if content_mode == "text":
-        kwargs["text"] = {"max_characters": 10_000}
-    elif content_mode == "highlights":
-        kwargs["highlights"] = {"max_characters": 4_000}
-    elif content_mode == "summary":
-        kwargs["summary"] = True
-
-    if freshness == "always":
-        kwargs["max_age_hours"] = 0
-    elif freshness == "never":
-        kwargs["max_age_hours"] = -1
+    kwargs = build_contents_param(content_mode, freshness) or {}
 
     response = client.get_contents(urls, **kwargs)
     return _response_to_dict(response)

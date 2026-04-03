@@ -44,9 +44,10 @@ def runner():
 
 def _resolve_cli() -> list[str]:
     """Return the command prefix to invoke cli-anything-exa."""
+    import shutil
+
     cmd = "cli-anything-exa"
-    result = subprocess.run(["which", cmd], capture_output=True, text=True)
-    if result.returncode == 0:
+    if shutil.which(cmd):
         return [cmd]
     # Fall back to module invocation
     return [sys.executable, "-m", "cli_anything.exa"]
