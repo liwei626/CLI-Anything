@@ -1,0 +1,1 @@
+"""Openscreen CLI package."""

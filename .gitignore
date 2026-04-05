@@ -81,6 +81,7 @@
 !/rms/
 !/renderdoc/
 !/cloudcompare/
+!/openscreen/
 
 # Step 5: Inside each software dir, ignore everything (including dotfiles)
 /gimp/*
@@ -137,6 +138,8 @@
 /renderdoc/.*
 /cloudcompare/*
 /cloudcompare/.*
+/openscreen/*
+/openscreen/.*
 /wiremock/*
 /wiremock/.*
 
@@ -170,6 +173,7 @@
 !/rms/agent-harness/
 !/renderdoc/agent-harness/
 !/cloudcompare/agent-harness/
+!/openscreen/agent-harness/
 !/wiremock/
 !/wiremock/agent-harness/
 

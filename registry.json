@@ -286,6 +286,20 @@
       "contributor_url": "https://github.com/HKUDS/CLI-Anything"
     },
     {
+      "name": "openscreen",
+      "display_name": "Openscreen",
+      "version": "1.0.0",
+      "description": "Screen recording editor — zoom, speed ramps, trim, crop, annotations, backgrounds, and polished exports via ffmpeg",
+      "requires": "ffmpeg (apt install ffmpeg)",
+      "homepage": "https://github.com/siddharthvaddem/openscreen",
+      "install_cmd": "pip install git+https://github.com/HKUDS/CLI-Anything.git#subdirectory=openscreen/agent-harness",
+      "entry_point": "cli-anything-openscreen",
+      "skill_md": "openscreen/agent-harness/cli_anything/openscreen/skills/SKILL.md",
+      "category": "video",
+      "contributor": "ndpvt-web",
+      "contributor_url": "https://github.com/ndpvt-web"
+    },
+    {
       "name": "zoom",
       "display_name": "Zoom",
       "version": "1.0.0",
