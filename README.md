@@ -820,6 +820,13 @@ Each application received complete, production-ready CLI interfaces — not demo
 <td align="center">✅ 154</td>
 </tr>
 <tr>
+<td align="center"><strong>🎬 <a href="openscreen/agent-harness/">Openscreen</a></strong></td>
+<td>Screen Recording Editor</td>
+<td><code>cli-anything-openscreen</code></td>
+<td>ffmpeg backend</td>
+<td align="center">✅ 101</td>
+</tr>
+<tr>
 <td align="center"><strong>📞 Zoom</strong></td>
 <td>Video Conferencing</td>
 <td><code>cli-anything-zoom</code></td>
@@ -923,7 +930,7 @@ Each application received complete, production-ready CLI interfaces — not demo
 </tr>
 </table>
 
-> **100% pass rate** across all 2,045 tests — 1,493 unit tests + 533 end-to-end tests + 19 Node.js tests.
+> **100% pass rate** across all 2,146 tests — 1,594 unit tests + 533 end-to-end tests + 19 Node.js tests.
 
 ---
 
@@ -960,8 +967,9 @@ ollama         98 passed  ✅   (87 unit + 11 e2e)
 sketch         19 passed  ✅   (19 jest, Node.js)
 renderdoc      59 passed  ✅   (45 unit + 14 e2e)
 cloudcompare   88 passed  ✅   (49 unit + 39 e2e)
+openscreen    101 passed  ✅   (78 unit + 23 e2e)
 ──────────────────────────────────────────────────────────────────────────────
-TOTAL        2,005 passed  ✅   100% pass rate
+TOTAL        2,106 passed  ✅   100% pass rate
 ```
 
 ---
@@ -1035,6 +1043,7 @@ cli-anything/
 ├── 🎨 sketch/agent-harness/             # Sketch CLI (19 tests, Node.js)
 ├── 🔬 renderdoc/agent-harness/          # RenderDoc CLI (59 tests)
 ├── 🎬 videocaptioner/agent-harness/     # VideoCaptioner CLI (26 tests)
+├── 🎬 openscreen/agent-harness/         # Openscreen CLI — screen recording editor (101 tests)
 ├── ☁️ cloudcompare/agent-harness/       # CloudCompare CLI (88 tests)
 └── 🔍 exa/agent-harness/               # Exa CLI (40 tests)
 ```
