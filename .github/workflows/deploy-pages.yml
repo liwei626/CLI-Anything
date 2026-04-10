@@ -7,6 +7,8 @@ on:
     paths:
       - '*/agent-harness/**'
       - 'registry.json'
+      - 'cli-hub/**'
+      - 'docs/hub/**'
       - '.github/workflows/deploy-pages.yml'
       - '.github/scripts/update_registry_dates.py'
       - '.github/scripts/generate_meta_skill.py'
@@ -43,6 +45,9 @@ jobs:
 
       - name: Copy catalog as .txt to avoid Jekyll processing
         run: cp cli-hub-skill/SKILL.md docs/hub/SKILL.txt
+
+      - name: Copy registry.json to hub for cli-hub access
+        run: cp registry.json docs/hub/registry.json
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
