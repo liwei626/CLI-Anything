@@ -55,7 +55,7 @@ agent-harness/
 | `doctor` | `info` |
 | `launch` | `detached`, `attach` |
 | `frame` | `capture` |
-| `gpu-trace` | `capture` |
+| `gpu-trace` | `capture`, `summarize` |
 | `cpp` | `capture` |
 
 ## Backend Strategy

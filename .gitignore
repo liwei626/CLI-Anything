@@ -225,6 +225,8 @@
 !/safari/
 !/safari/agent-harness/
 !/nsight-graphics/agent-harness/
+!/nsight-graphics/README.md
+!/nsight-graphics/README_CN.md
 
 # Step 7: Ignore build artifacts within allowed dirs
 **/__pycache__/

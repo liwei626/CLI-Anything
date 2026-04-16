@@ -49,6 +49,48 @@ def _common_kwargs(ctx: click.Context) -> dict:
     }
 
 
+def _print_gpu_trace_summary(summary: dict) -> None:
+    """Render a compact human-readable GPU Trace summary."""
+    frame_time = summary.get("frame_time_ms")
+    fps = summary.get("fps_estimate")
+    if frame_time is not None:
+        click.echo(f"Frame time: {frame_time:.3f} ms")
+    if fps is not None:
+        click.echo(f"Estimated FPS: {fps:.2f}")
+
+    metrics = summary.get("metrics", {})
+    if metrics:
+        click.echo("Metrics:")
+        for label, key in [
+            ("Draws", "draw_count"),
+            ("Dispatches", "dispatch_count"),
+            ("Graphics active %", "graphics_engine_active_pct"),
+            ("Compute sync active %", "compute_queue_sync_active_pct"),
+            ("SM throughput %", "sm_throughput_pct"),
+            ("L2 throughput %", "l2_throughput_pct"),
+            ("DRAM throughput %", "dram_throughput_pct"),
+        ]:
+            value = metrics.get(key)
+            if value is None:
+                continue
+            if isinstance(value, float):
+                click.echo(f"  {label}: {value:.3f}")
+            else:
+                click.echo(f"  {label}: {value}")
+
+    top_events = summary.get("top_events", [])
+    if top_events:
+        click.echo("Top GPU events:")
+        for item in top_events:
+            click.echo(f"  - {item['event']}: {item['time_ms']:.3f} ms")
+
+    highlights = summary.get("highlights", [])
+    if highlights:
+        click.echo("Highlights:")
+        for line in highlights:
+            click.echo(f"  - {line}")
+
+
 @click.group(invoke_without_command=True)
 @click.option("--json", "json_mode", is_flag=True, help="Output in JSON format.")
 @click.option("--debug", is_flag=True, help="Show debug tracebacks on errors.")
@@ -253,6 +295,8 @@ def gpu_trace_group():
 @click.option("--metric-set-id", default=None, help="Metric set id for the selected architecture.")
 @click.option("--multi-pass-metrics", is_flag=True, help="Enable multi-pass metrics.")
 @click.option("--real-time-shader-profiler", is_flag=True, help="Enable real-time shader profiler.")
+@click.option("--summarize", is_flag=True, help="Parse exported GPU Trace tables and include a summary.")
+@click.option("--summary-limit", type=int, default=10, show_default=True, help="Number of top GPU events to include in the summary.")
 @click.pass_context
 def gpu_trace_capture_cmd(
     ctx,
@@ -272,6 +316,8 @@ def gpu_trace_capture_cmd(
     metric_set_id,
     multi_pass_metrics,
     real_time_shader_profiler,
+    summarize,
+    summary_limit,
 ):
     """Run a GPU Trace capture."""
     try:
@@ -292,9 +338,32 @@ def gpu_trace_capture_cmd(
             metric_set_id=metric_set_id,
             multi_pass_metrics=multi_pass_metrics,
             real_time_shader_profiler=real_time_shader_profiler,
+            summarize=summarize,
+            summary_limit=summary_limit,
             **_common_kwargs(ctx),
         )
-        _output(ctx, data)
+        _output(
+            ctx,
+            data,
+            lambda payload: (
+                click.echo(f"Output dir: {payload.get('output_dir')}"),
+                click.echo(f"Artifacts: {payload.get('artifact_count', 0)}"),
+                _print_gpu_trace_summary(payload["summary"]) if payload.get("summary") else None,
+            ),
+        )
+    except Exception as exc:
+        _handle_exc(ctx, exc)
+
+
+@gpu_trace_group.command("summarize")
+@click.option("--input-dir", required=True, type=click.Path(exists=True, file_okay=False), help="GPU Trace export directory to summarize.")
+@click.option("--summary-limit", type=int, default=10, show_default=True, help="Number of top GPU events to include in the summary.")
+@click.pass_context
+def gpu_trace_summarize_cmd(ctx, input_dir, summary_limit):
+    """Summarize an existing exported GPU Trace directory."""
+    try:
+        data = gpu_trace.summarize_export_dir(input_dir, top_n=summary_limit)
+        _output(ctx, data, _print_gpu_trace_summary)
     except Exception as exc:
         _handle_exc(ctx, exc)
 
@@ -346,7 +415,7 @@ def repl(ctx):
         "doctor": "info|versions",
         "launch": "detached|attach",
         "frame": "capture",
-        "gpu-trace": "capture",
+        "gpu-trace": "capture|summarize",
         "cpp": "capture",
         "help": "Show this help",
         "quit": "Exit REPL",

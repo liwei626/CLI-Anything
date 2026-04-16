@@ -24,7 +24,7 @@ Command-line orchestration of official NVIDIA Nsight Graphics activities.
 - Launch an application detached under Nsight
 - Attach Nsight to a running PID
 - Trigger Frame Debugger capture
-- Trigger GPU Trace capture and auto-export
+- Trigger GPU Trace capture, auto-export, and summarize
 - Trigger Generate C++ Capture
 
 ## Commands
@@ -59,7 +59,11 @@ cli-anything-nsight-graphics --output-dir D:\traces gpu-trace capture ^
   --exe "C:\Path\To\App.exe" ^
   --start-after-ms 1000 ^
   --limit-to-frames 1 ^
-  --auto-export
+  --auto-export ^
+  --summarize
+
+cli-anything-nsight-graphics gpu-trace summarize ^
+  --input-dir D:\traces
 ```
 
 ### Generate C++ Capture
@@ -76,6 +80,7 @@ cli-anything-nsight-graphics --output-dir D:\cpp cpp capture ^
 - Use `doctor versions` to list detected installs when multiple Nsight Graphics versions exist.
 - Use `--nsight-path` to force a specific install directory or `ngfx.exe`.
 - Use `--json` for programmatic workflows.
+- Prefer `gpu-trace capture --auto-export --summarize` for one-step performance triage.
 - Frame/GPU/C++ capture commands require a launch target through `--exe` or a
   preconfigured root-level `--project`.
 - V1 is orchestration-focused; it does not expose shader, pipeline, or resource

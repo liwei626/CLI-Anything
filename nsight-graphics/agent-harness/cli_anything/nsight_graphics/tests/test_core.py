@@ -286,6 +286,42 @@ class TestCommandBuilders:
         assert diff[0]["path"].endswith("capture.ngfx-capture")
         assert diff[0]["size"] > 0
 
+    def test_gpu_trace_summary_from_export_dir(self, tmp_path):
+        base = tmp_path / "BASE"
+        base.mkdir()
+        (base / "FRAME.xls").write_text("GPU frame time\t31.0446\n", encoding="utf-8")
+        (base / "GPUTRACE_FRAME.xls").write_text(
+            "\n".join(
+                [
+                    "FE_B.TriageAC.fe__draw_count.sum\t309",
+                    "FE_A.TriageAC.gr__dispatch_count.sum\t2561",
+                    "FE_B.TriageAC.gr__cycles_active.avg.pct_of_peak_sustained_elapsed\t98.1079",
+                    "FE_A.TriageAC.gr__compute_cycles_active_queue_sync.avg.pct_of_peak_sustained_elapsed\t84.24",
+                    "TriageAC.sm__throughput.avg.pct_of_peak_sustained_elapsed\t23.6331",
+                    "LTS.TriageAC.lts__throughput.avg.pct_of_peak_sustained_elapsed\t32.0437",
+                    "FBSP.TriageAC.dramc__throughput.avg.pct_of_peak_sustained_elapsed\t19.5897",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        (base / "D3DPERF_EVENTS.xls").write_text(
+            "event_text\ttime_ms\n"
+            "Frame 1221\t31.0431\n"
+            "Scene\t29.9644\n"
+            "        DirectLighting\t15.3828\n"
+            "        ReSTIRDI\t14.0627\n",
+            encoding="utf-8",
+        )
+
+        summary = gpu_trace.summarize_export_dir(str(tmp_path), top_n=3)
+        assert summary["frame_time_ms"] == pytest.approx(31.0446)
+        assert summary["fps_estimate"] == pytest.approx(1000.0 / 31.0446)
+        assert summary["metrics"]["draw_count"] == 309
+        assert summary["metrics"]["dispatch_count"] == 2561
+        assert summary["top_events"][0]["event"] == "Scene"
+        assert summary["top_events"][1]["event"] == "DirectLighting"
+        assert summary["highlights"]
+
 
 class TestCoreModules:
     @patch("cli_anything.nsight_graphics.core.frame.backend.run_with_artifacts")
@@ -440,6 +476,66 @@ class TestCoreModules:
         assert result["activity"] == "Generate C++ Capture"
         assert result["tool_mode"] == "unified"
 
+    @patch("cli_anything.nsight_graphics.core.gpu_trace.backend.run_with_artifacts")
+    @patch("cli_anything.nsight_graphics.core.gpu_trace.backend.build_unified_command")
+    @patch("cli_anything.nsight_graphics.core.gpu_trace.backend.probe_installation")
+    def test_gpu_trace_capture_with_summary(self, probe_mock, build_mock, run_mock, tmp_path):
+        base = tmp_path / "BASE"
+        base.mkdir()
+        (base / "FRAME.xls").write_text("GPU frame time\t16.0\n", encoding="utf-8")
+        (base / "GPUTRACE_FRAME.xls").write_text(
+            "FE_B.TriageAC.fe__draw_count.sum\t100\nFE_A.TriageAC.gr__dispatch_count.sum\t50\n",
+            encoding="utf-8",
+        )
+        (base / "D3DPERF_EVENTS.xls").write_text(
+            "event_text\ttime_ms\nFrame 1\t16.0\nScene\t10.0\n",
+            encoding="utf-8",
+        )
+
+        probe_mock.return_value = {
+            "binaries": {"ngfx": "C:/Nsight/ngfx.exe", "ngfx_capture": None, "ngfx_replay": None},
+        }
+        build_mock.return_value = ["C:/Nsight/ngfx.exe", "--activity", "GPU Trace Profiler"]
+        run_mock.return_value = {
+            "ok": True,
+            "returncode": 0,
+            "stdout": "",
+            "stderr": "",
+            "command": "ngfx",
+            "artifacts": [],
+            "artifact_count": 0,
+        }
+
+        result = gpu_trace.capture_trace(
+            nsight_path=None,
+            project=None,
+            output_dir=str(tmp_path),
+            hostname=None,
+            platform_name=None,
+            exe="C:/demo.exe",
+            working_dir=None,
+            args=(),
+            envs=(),
+            start_after_frames=1,
+            start_after_submits=None,
+            start_after_ms=None,
+            start_after_hotkey=False,
+            max_duration_ms=None,
+            limit_to_frames=1,
+            limit_to_submits=None,
+            auto_export=False,
+            architecture=None,
+            metric_set_id=None,
+            multi_pass_metrics=False,
+            real_time_shader_profiler=False,
+            summarize=True,
+            summary_limit=5,
+        )
+
+        assert result["auto_export"] is True
+        assert result["summary"]["frame_time_ms"] == pytest.approx(16.0)
+        assert result["summary"]["top_events"][0]["event"] == "Scene"
+
 
 class TestCLIHelp:
     def test_root_help(self):
@@ -478,6 +574,7 @@ class TestCLIHelp:
             (["launch", "--help"], "detached"),
             (["frame", "--help"], "capture"),
             (["gpu-trace", "--help"], "capture"),
+            (["gpu-trace", "--help"], "summarize"),
             (["cpp", "--help"], "capture"),
         ],
     )

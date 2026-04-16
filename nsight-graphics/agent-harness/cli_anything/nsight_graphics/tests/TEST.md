@@ -2,7 +2,7 @@
 
 ## Test Inventory Plan
 
-- `test_core.py`: 28 unit tests planned
+- `test_core.py`: 31 unit tests planned
 - `test_full_e2e.py`: 4 E2E tests planned
 
 ## Unit Test Plan
@@ -18,12 +18,14 @@
 - fixed-drive discovery for non-`C:` installs
 - unified and split command construction
 - artifact diffing behavior
+- exported GPU Trace summary parsing
 
 ### `core/*.py`
 
 - frame capture command routing
 - split-mode fallback restrictions
 - GPU Trace validation for trigger/limit options
+- GPU Trace one-step summary behavior
 - launch attach/detached wrapping
 
 ### `nsight_graphics_cli.py`
@@ -62,8 +64,8 @@ python -m pytest cli_anything/nsight_graphics/tests -v --tb=no
 ============================= test session starts =============================
 platform win32 -- Python 3.11.9, pytest-9.0.3, pluggy-1.6.0 -- C:\Users\aimidi\AppData\Local\Programs\Python\Python311\python.exe
 cachedir: .pytest_cache
-rootdir: D:\code\D5\CLI-Anything-nsight-graphics\nsight-graphics\agent-harness
-collecting ... collected 32 items
+rootdir: D:\code\D5\CLI-Anything-nsight-graphics-dev\nsight-graphics\agent-harness
+collecting ... collected 35 items
 
 cli_anything/nsight_graphics/tests/test_core.py::TestOutputAndErrors::test_output_json PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestOutputAndErrors::test_handle_error_debug PASSED
@@ -79,11 +81,13 @@ cli_anything/nsight_graphics/tests/test_core.py::TestHelpParsing::test_parse_uni
 cli_anything/nsight_graphics/tests/test_core.py::TestCommandBuilders::test_build_unified_command_formats_args_and_env PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCommandBuilders::test_build_split_capture_command_maps_wait_seconds PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCommandBuilders::test_diff_snapshots_reports_new_nonempty_files PASSED
+cli_anything/nsight_graphics/tests/test_core.py::TestCommandBuilders::test_gpu_trace_summary_from_export_dir PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_frame_capture_uses_unified_ngfx PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_frame_capture_split_mode_rejects_perf_exports PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_gpu_trace_requires_arch_for_metric_set PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_launch_attach_returns_unified_result PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_cpp_capture_sets_activity PASSED
+cli_anything/nsight_graphics/tests/test_core.py::TestCoreModules::test_gpu_trace_capture_with_summary PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_root_help PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_nsight_path_is_forwarded_to_doctor PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args0-info] PASSED
@@ -91,20 +95,21 @@ cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[ar
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args2-detached] PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args3-capture] PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args4-capture] PASSED
-cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args5-capture] PASSED
+cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args5-summarize] PASSED
+cli_anything/nsight_graphics/tests/test_core.py::TestCLIHelp::test_group_help[args6-capture] PASSED
 cli_anything/nsight_graphics/tests/test_core.py::TestCLISubprocess::test_cli_help_subprocess PASSED
 cli_anything/nsight_graphics/tests/test_full_e2e.py::TestDoctorE2E::test_doctor_info PASSED
 cli_anything/nsight_graphics/tests/test_full_e2e.py::TestTargetedE2E::test_frame_capture SKIPPED
 cli_anything/nsight_graphics/tests/test_full_e2e.py::TestTargetedE2E::test_gpu_trace_capture SKIPPED
 cli_anything/nsight_graphics/tests/test_full_e2e.py::TestTargetedE2E::test_cpp_capture SKIPPED
 
-======================== 29 passed, 3 skipped in 1.83s ========================
+======================== 32 passed, 3 skipped in 1.92s ========================
 ```
 
 ## Summary Statistics
 
-- Total tests collected: 32
-- Passed: 29
+- Total tests collected: 35
+- Passed: 32
 - Skipped: 3
 - Pass rate for executed tests: 100%
 

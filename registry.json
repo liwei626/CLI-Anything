@@ -657,9 +657,9 @@
     },
     {
       "name": "nsight-graphics",
-      "display_name": "Nsight Graphics",
+      "display_name": "Nsight Graphics CLI",
       "version": "0.1.0",
-      "description": "Windows-first orchestration of Nsight Graphics launch, Frame Debugger capture, GPU Trace, and Generate C++ Capture",
+      "description": "Windows-first Nsight Graphics CLI for Graphics/Frame capture, GPU Trace, Generate C++ Capture, and one-step GPU Trace summary",
       "requires": "NVIDIA Nsight Graphics installation with ngfx.exe or newer split capture/replay tools",
       "homepage": "https://developer.nvidia.com/nsight-graphics",
       "install_cmd": "pip install git+https://github.com/HKUDS/CLI-Anything.git#subdirectory=nsight-graphics/agent-harness",

@@ -8,7 +8,7 @@ terminal:
 - installation and capability probing
 - detached launch and PID attach
 - Frame Debugger capture
-- GPU Trace capture and auto-export
+- GPU Trace capture, auto-export, and summary generation
 - Generate C++ Capture
 
 It does not provide RenderDoc-style offline inspection of shaders, pipeline
@@ -85,7 +85,15 @@ cli-anything-nsight-graphics --output-dir D:\traces gpu-trace capture ^
   --exe "C:\VulkanSDK\1.3.290.0\Bin\vkcube.exe" ^
   --start-after-ms 1000 ^
   --limit-to-frames 1 ^
-  --auto-export
+  --auto-export ^
+  --summarize
+```
+
+### Summarize an existing GPU Trace export
+
+```bash
+cli-anything-nsight-graphics gpu-trace summarize ^
+  --input-dir D:\traces
 ```
 
 ### Generate a C++ capture
@@ -119,7 +127,8 @@ cli-anything-nsight-graphics --output-dir D:\cpp cpp capture ^
 | `launch` | `detached` | Launch a target under Nsight without blocking the CLI |
 | `launch` | `attach` | Attach Nsight to a running PID |
 | `frame` | `capture` | Trigger a Frame Debugger capture |
-| `gpu-trace` | `capture` | Trigger a GPU Trace capture |
+| `gpu-trace` | `capture` | Trigger a GPU Trace capture and optionally summarize the exported result |
+| `gpu-trace` | `summarize` | Summarize an existing GPU Trace export directory |
 | `cpp` | `capture` | Trigger Generate C++ Capture |
 
 ## JSON Output
@@ -138,6 +147,14 @@ Capture-producing commands also include:
 - `activity`
 - `output_dir`
 - `artifacts`
+
+When `gpu-trace capture --summarize` is used, the result also includes:
+
+- `summary.frame_time_ms`
+- `summary.fps_estimate`
+- `summary.metrics`
+- `summary.top_events`
+- `summary.highlights`
 
 ## Environment Variables
 
@@ -175,3 +192,23 @@ not currently have a discovered Nsight executable path. They are useful for
 diagnosis, but not enough by themselves to launch captures. The harness also
 scans standard `Program Files` locations on all fixed Windows drives, so
 non-`C:` installs can still be promoted to normal filesystem-backed entries.
+
+## One-Step GPU Trace Triage
+
+If you want the harness to behave like a single-shot performance assistant,
+prefer this pattern:
+
+```bash
+cli-anything-nsight-graphics --output-dir D:\traces gpu-trace capture ^
+  --exe "C:\Path\To\App.exe" ^
+  --start-after-hotkey ^
+  --limit-to-frames 1 ^
+  --auto-export ^
+  --summarize
+```
+
+That gives you:
+
+- the `.ngfx-gputrace` artifact
+- exported `FRAME.xls`, `GPUTRACE_FRAME.xls`, and `D3DPERF_EVENTS.xls`
+- a parsed summary with frame time, estimated FPS, selected counters, and top GPU events

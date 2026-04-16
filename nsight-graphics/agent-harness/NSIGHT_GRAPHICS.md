@@ -21,6 +21,7 @@ This harness targets the official command-line interfaces rather than the GUI.
 - attach to a running PID with an activity
 - Frame Debugger capture orchestration
 - GPU Trace capture orchestration
+- GPU Trace export summarization
 - Generate C++ Capture orchestration
 - artifact discovery in output directories
 
@@ -29,6 +30,7 @@ This harness targets the official command-line interfaces rather than the GUI.
 - replay-helper public commands
 - pipeline/resource/shader inspection APIs
 - deep analysis comparable to RenderDoc's Python bindings
+- full GUI-level replay investigation and editing workflows
 
 ## Compatibility Notes
 
@@ -37,3 +39,12 @@ This harness targets the official command-line interfaces rather than the GUI.
 - On newer installs, `ngfx-capture` / `ngfx-replay` may exist alongside `ngfx`.
 - This harness prefers capability detection over hard-coded version branching.
 - `--nsight-path` can explicitly select one installation when multiple versions coexist.
+
+## AI Operator Workflow
+
+For one-step performance triage, the intended flow is:
+
+1. run `doctor versions`
+2. optionally pin a version with `--nsight-path`
+3. run `gpu-trace capture --auto-export --summarize`
+4. inspect the returned summary and the exported `.xls` tables if you need more detail
