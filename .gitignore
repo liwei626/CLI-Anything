@@ -99,6 +99,7 @@
 !/n8n/
 !/obsidian/
 !/unrealinsights/
+!/nsight-graphics/
 !/lldb/
 
 # Step 5: Inside each software dir, ignore everything (including dotfiles)
@@ -184,6 +185,8 @@
 /obsidian/.*
 /unrealinsights/*
 /unrealinsights/.*
+/nsight-graphics/*
+/nsight-graphics/.*
 /lldb/*
 /lldb/.*
 
@@ -235,6 +238,7 @@
 !/safari/
 !/safari/agent-harness/
 !/unrealinsights/agent-harness/
+!/nsight-graphics/agent-harness/
 !/lldb/agent-harness/
 
 # Step 7: Ignore build artifacts within allowed dirs
