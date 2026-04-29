@@ -10,7 +10,8 @@ the `agent-harness/` directory.
 | `test_core.py` | All 13 core modules: project, scene, prefab, codegen, input_config, collision_config, material, sound, localization, session, export, validate, plus the s&box backend resolver | **155** |
 | `test_full_e2e.py` | CLI surface via subprocess invocation, project workflows end-to-end, sbox_backend integration | **50** |
 | `test_orchestrator.py` | Map-generation test orchestrator (combo matrix, sentinel polling, RGBA -> PNG conversion, config I/O) | **17** |
-| **Total** | | **222** |
+| `test_exit_codes.py` | One-shot CLI exit-code contract: failures exit 1 (human + JSON modes), success exits 0, validation failure exits 1, REPL absorbs SystemExit | **16** |
+| **Total** | | **238** |
 
 ## 2. Running the Tests
 
@@ -103,6 +104,15 @@ python -m pytest cli_anything/sbox/tests/ -v
 | `TestRgbaConversion` | 2 | RGBA byte-array -> PNG via Pillow |
 | `TestDataPathResolution` | 2 | `FileSystem.Data` path resolution across editor and standalone |
 
+### `test_exit_codes.py` (16 tests, 3 classes)
+
+| Class | Tests | Coverage |
+|---|---|---|
+| `TestOneShotFailureExitsNonZero` | 9 | Failure paths in one-shot mode return exit 1: missing scene/project file (human + JSON), missing localization key, missing required args, invalid JSON in `--properties`, asset compile without s&box install. Includes the `--help` exit-0 baseline. |
+| `TestOneShotSuccessExitsZero` | 2 | Confirms the success path was not regressed by the exit-1-on-failure change |
+| `TestProjectValidateExitsNonZero` | 2 | `project validate` exits 1 when `ok=False` (broken refs) so CI can gate on it; clean project still exits 0 |
+| `TestReplModeAbsorbsExit` | 3 | `_output_error` does not call `sys.exit` when `ctx.obj["repl"] = True`; one-shot is the safe default when the key is absent |
+
 ## 4. Coverage by Source Module
 
 | Module | Unit | E2E | Subprocess |
@@ -121,7 +131,7 @@ python -m pytest cli_anything/sbox/tests/ -v
 | `core/validate.py` | 4 | - | 2 (validate clean, validate broken) |
 | `core/test_orchestrator.py` | 17 (full file) | - | - |
 | `utils/sbox_backend.py` | - | 3 (installation, version, executable - skipped if no s&box) | - |
-| `sbox_cli.py` (CLI) | - | - | 40 (full TestCLISubprocess) |
+| `sbox_cli.py` (CLI) | - | - | 40 (full TestCLISubprocess) + 16 (test_exit_codes: failure exit-code contract + REPL absorb) |
 
 ## 5. E2E Prerequisites
 
@@ -136,9 +146,9 @@ python -m pytest cli_anything/sbox/tests/ -v
 
 - `server start` and `launch` commands are tested only via help-text smoke; running an actual s&box server / editor process is out of scope (would require live network sockets and a running game).
 - `session undo`/`redo` is tested at the unit level; no E2E workflow exercises the undo journal in a realistic edit-undo-edit sequence.
-- `asset compile` is help-tested only; invoking the s&box `resourcecompiler.exe` requires a full s&box install and is left to the upstream maintainers' CI.
+- `asset compile` is help-tested only; invoking the s&box `resourcecompiler.exe` requires a full s&box install and is left to the upstream maintainers' CI. The non-zero exit-code path on missing/failed compile is exercised by `test_exit_codes.py::test_asset_compile_missing_sbox_exits_one`.
 
 ## 7. Known Test-Environment Quirks
 
-- On Windows, `subprocess.Popen` with inheritable handles can hit `OSError: [WinError 6] The handle is invalid` after ~25-30 sequential subprocess calls in some sandboxed environments (tested in PowerShell, MSYS2 bash). Mitigation: run `TestCLISubprocess` in isolation (`pytest cli_anything/sbox/tests/test_full_e2e.py -k TestCLISubprocess`) or use `--forked` if `pytest-forked` is installed. Tests pass cleanly in non-sandboxed terminals.
+- On Windows + Python 3.14 + pytest, `subprocess.Popen` can hit `OSError: [WinError 6] The handle is invalid` before the child process starts because the parent's stdin handle is not inheritable. Both `TestCLISubprocess._run` (in `test_full_e2e.py`) and `_run` in `test_exit_codes.py` pass `stdin=subprocess.DEVNULL` to work around this. If you add new subprocess invocations in tests, mirror that pattern.
 - All file I/O is UTF-8 explicit (`open(..., encoding="utf-8")`). Earlier versions defaulted to the platform codec on Windows; that was fixed before upstream submission.

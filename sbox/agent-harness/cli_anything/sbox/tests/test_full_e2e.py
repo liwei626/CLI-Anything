@@ -593,6 +593,7 @@ class TestCLISubprocess:
             text=True,
             check=check,
             timeout=30,
+            stdin=subprocess.DEVNULL,
         )
 
     def test_help(self):
@@ -1070,7 +1071,12 @@ class TestCLISubprocess:
         assert data["duplicate_guids"] == []
 
     def test_project_validate_broken_json( self, tmp_path ):
-        """project validate flags a broken model reference."""
+        """project validate flags a broken model reference and exits 1.
+
+        Validation failures must exit non-zero so CI can gate on this command;
+        check=False is required because subprocess.run with check=True would
+        raise CalledProcessError before our assertions run.
+        """
         self._run( ["--json", "project", "new", "--name", "v2", "--output-dir", str( tmp_path )] )
         scene_path = os.path.join( str( tmp_path ), "Assets", "scenes", "broken.scene" )
         self._run( ["--json", "scene", "new", "--name", "broken", "-o", scene_path, "--no-defaults"] )
@@ -1080,8 +1086,11 @@ class TestCLISubprocess:
             "--json", "scene", "add-component", scene_path, guid, "Sandbox.ModelRenderer",
             "--properties", '{"Model": "models/missing/whoops.vmdl"}',
         ] )
-        result = self._run( ["--json", "--project", str( tmp_path ), "project", "validate", "--no-inputs"] )
-        assert result.returncode == 0
+        result = self._run(
+            ["--json", "--project", str( tmp_path ), "project", "validate", "--no-inputs"],
+            check=False,
+        )
+        assert result.returncode == 1
         data = json.loads( result.stdout )
         assert data["ok"] is False
         assert any( "missing/whoops" in b["ref"] for b in data["broken_refs"] )

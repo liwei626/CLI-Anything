@@ -213,6 +213,14 @@ def run_single_combo(
             }
 
         png_path = collect_screenshot(data_path, output_dir, strategy, size, seed)
+        # If sentinel reported success but no screenshot was produced, surface
+        # this as a failure rather than reporting a successful run with no PNG.
+        if png_path is None:
+            return {
+                "success": False,
+                "error": "screenshot files not produced (no metadata.json or rgba)",
+                "combo": combo,
+            }
         return {"success": True, "png_path": png_path, "combo": combo}
 
     finally:

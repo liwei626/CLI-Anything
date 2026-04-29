@@ -3,6 +3,7 @@
 import copy
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -69,7 +70,9 @@ class Session:
     def load( self ) -> None:
         """Load session from disk.
 
-        If the file does not exist or is malformed, resets to empty state.
+        If the file does not exist or is malformed, resets to empty state. A
+        malformed file is preserved as ``<path>.corrupt`` so the user's undo
+        history is not silently destroyed.
         """
         try:
             with open( self._session_path, "r", encoding="utf-8" ) as f:
@@ -80,7 +83,20 @@ class Session:
                 self._data = merged
             else:
                 self._data = _empty_session_data()
-        except (OSError, json.JSONDecodeError, ValueError):
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            # Preserve the malformed file before resetting so the user can
+            # recover state if needed; emit a stderr warning so the reset is
+            # not silent.
+            try:
+                backup = self._session_path + ".corrupt"
+                if os.path.isfile( self._session_path ):
+                    os.replace( self._session_path, backup )
+                sys.stderr.write(
+                    f"warning: session file at {self._session_path} could not be read "
+                    f"({exc}); preserved as {backup} and reset to empty state\n"
+                )
+            except OSError:
+                pass
             self._data = _empty_session_data()
 
     def save( self ) -> None:

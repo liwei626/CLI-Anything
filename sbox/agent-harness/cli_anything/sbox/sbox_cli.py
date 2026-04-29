@@ -9,6 +9,7 @@ import click
 import json
 import os
 import shlex
+import sys
 from typing import Any, Optional
 
 from cli_anything.sbox.core import (
@@ -52,11 +53,20 @@ def _output(ctx: click.Context, data: Any, human_fn=None) -> None:
 
 
 def _output_error(ctx: click.Context, message: str) -> None:
-    """Output an error message in the appropriate format."""
+    """Output an error message and signal failure to scripts and agents.
+
+    In one-shot mode, exits the process with code 1 after printing so callers
+    observe a non-zero exit on failure. In REPL mode (``ctx.obj["repl"]`` is
+    truthy), prints and returns so the REPL loop continues. Centralising the
+    exit-on-error here keeps per-command try/except blocks simple while still
+    propagating failures correctly.
+    """
     if ctx.obj.get( "json" ):
         click.echo( json.dumps( {"error": message} ) )
     else:
         click.echo( f"Error: {message}", err=True )
+    if not ctx.obj.get( "repl" ):
+        sys.exit( 1 )
 
 
 def _format_table(rows: list, headers: list) -> str:
@@ -329,6 +339,9 @@ def project_validate( ctx, no_refs, no_guids, no_inputs ):
             return "\n".join( lines )
 
         _output( ctx, result, human )
+        # Validation failure must exit non-zero so CI can gate on this command.
+        if not result.get( "ok", True ) and not ctx.obj.get( "repl" ):
+            sys.exit( 1 )
     except click.ClickException:
         raise
     except Exception as exc:
@@ -1602,6 +1615,11 @@ def server_info( ctx ):
     try:
         exe = sbox_backend.find_executable( "sbox-server" )
         version = sbox_backend.get_sbox_version()
+        # get_sbox_version is documented to return {"error": ...} on failure
+        # rather than raising, so check explicitly to propagate exit code.
+        if isinstance( version, dict ) and version.get( "error" ):
+            _output_error( ctx, f"Failed to read s&box version: {version['error']}" )
+            return
         result = {"executable": exe, "version": version}
         _output( ctx, result, lambda d: _format_status_block( {
             "executable": d["executable"],
@@ -1664,6 +1682,12 @@ def asset_info( ctx, asset_path ):
     """Show asset details."""
     try:
         result = export_mod.get_asset_info( asset_path )
+        # _parse_json_asset embeds parse failures as json_info.error; surface
+        # those so a malformed scene/prefab yields a non-zero exit code.
+        json_info_error = result.get( "json_info", {} ).get( "error" ) if isinstance( result.get( "json_info" ), dict ) else None
+        if json_info_error:
+            _output_error( ctx, f"{result.get( 'name', asset_path )}: {json_info_error}" )
+            return
         _output( ctx, result, lambda d: _format_status_block( d, f"Asset: {d.get( 'name', '' )}" ) )
     except Exception as exc:
         _output_error( ctx, str( exc ) )
@@ -1677,6 +1701,12 @@ def asset_compile( ctx, asset_path ):
     try:
         from cli_anything.sbox.utils import sbox_backend
         result = sbox_backend.run_resource_compiler( asset_path )
+        if not result.get( "success", False ):
+            rc = result.get( "return_code", "?" )
+            stderr = ( result.get( "stderr" ) or "" ).strip()
+            detail = f": {stderr}" if stderr else ""
+            _output_error( ctx, f"Resource compilation failed (return code {rc}){detail}" )
+            return
         _output( ctx, result, lambda d: f"Compiled: {d.get( 'asset_path', asset_path )}" )
     except click.ClickException:
         raise
@@ -2250,6 +2280,10 @@ def test_run( ctx, strategies, sizes, seeds, seed_count, timeout ):
         }
 
         _output( ctx, summary, lambda d: _format_status_block( d, "Test Run Complete" ) )
+        # Partial-failure: scripts/agents need a non-zero exit when any combo
+        # fails, otherwise the summary is misleading (printed N failures, exit 0).
+        if failed > 0 and not ctx.obj.get( "repl" ):
+            sys.exit( 1 )
     except Exception as exc:
         _output_error( ctx, str( exc ) )
 
@@ -2303,8 +2337,16 @@ Example: project info
 @click.pass_context
 def repl( ctx ):
     """Enter interactive REPL mode."""
-    from cli_anything.sbox.utils.repl_skin import ReplSkin
-    skin = ReplSkin()
+    # Mark REPL mode so _output_error prints + returns instead of sys.exit(1).
+    # Shared via obj=ctx.obj on the inner cli invocation below so child
+    # commands see the same flag.
+    ctx.obj["repl"] = True
+
+    try:
+        from cli_anything.sbox.utils.repl_skin import ReplSkin
+        skin = ReplSkin( "sbox", version="1.0.0" )
+    except (ImportError, TypeError):
+        skin = None
 
     def echo( msg ):
         if skin and hasattr( skin, "info" ):
@@ -2355,7 +2397,7 @@ def repl( ctx ):
             extra_args.extend( ["--project", project_path] )
 
         try:
-            cli( extra_args + args, standalone_mode=False, parent=ctx.parent )
+            cli( extra_args + args, standalone_mode=False, obj=ctx.obj )
         except SystemExit:
             # Click may raise SystemExit on --help or errors; absorb it in REPL mode
             pass
